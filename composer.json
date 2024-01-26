@@ -1,0 +1,24 @@
+{
+    "name": "d3j-digital/data-transfer-object",
+    "description": "Map, populate and manipulate data with ease. Suitable for PHP 8 projects and above.",
+    "keywords": ["php", "data transfer object", "dto", "laravel", "symfony", "zend"],
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/d3j-digital/data-transfer-object/issues",
+        "source": "https://github.com/d3j-digital/data-transfer-object"
+    },
+    "authors": [
+        {
+            "name": "Dom McLaughlin",
+            "email": "dom@d3j.digital"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "D3JDigital\\DataTransferObject\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^8.0"
+    }
+}
