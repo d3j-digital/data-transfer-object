@@ -119,20 +119,32 @@ class DataTransferObject
      */
     private function _populateReflectionProperty(string $key, string $property, mixed $value): void
     {
-        $map = (isset($this->_params->map[$key]) && is_array($this->_params->map[$key]) ? $this->_params->map[$key] : []);
+        if (!$value) {
+            return;
+        }
+
+        $map = $this->_params->map[$key] ?? [];
 
         $reflectionProperty = new \ReflectionProperty($this, $property);
-        $reflectionPropertyTypeName = $reflectionProperty?->getType()?->getName() ?? '';
-        if ($reflectionPropertyTypeName === 'array') {
-            preg_match('/@var array{(?<class>.*)}/m', $reflectionProperty->getDocComment(), $matches);
-            
-            if (isset($matches[1])) {
-                if ($this->_createReflectionClassInstance($matches[1], [$this, '_populateArrayableDtoProperty'], $property, $value, $map)) {
+        $reflectionPropertyType = $reflectionProperty?->getType()?->getName() ?? '';
+
+        switch ($reflectionPropertyType) {
+            case 'array':
+                preg_match('/@var array{(?<class>.*)}/m', $reflectionProperty->getDocComment(), $matches);
+
+                if (isset($matches[1])) {
+                    $classInstance = $this->_createReflectionClassInstance($matches[1], [$this, '_populateArrayableDtoProperty'], $property, $value, $map);
+                    if ($classInstance) {
+                        return;
+                    }
+                }
+                break;
+            default:
+                $classInstance = $this->_createReflectionClassInstance($reflectionPropertyType, [$this, '_populateDtoProperty'], $property, $value, $map);
+                if ($classInstance) {
                     return;
                 }
-            }
-        } else if ($this->_createReflectionClassInstance($reflectionPropertyTypeName, [$this, '_populateDtoProperty'], $property, $value, $map)) {
-            return;
+                break;
         }
 
         $this->{$property} = $value;
@@ -169,7 +181,10 @@ class DataTransferObject
      */
     private function _populateDtoProperty(DataTransferObject $class, string $property, array $value, array $map = []): void
     {
-        $this->{$property} = (new $class($value ?? [], $map))->get();
+        $class->map($map);
+        $class->fill($value);
+
+        $this->{$property} = $class->get();
     }
 
     /**
