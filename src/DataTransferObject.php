@@ -123,7 +123,10 @@ class DataTransferObject
             return;
         }
 
-        $map = $this->_params->map[$key] ?? [];
+        $map = [];
+        if (isset($this->_params->map[$key]) && is_array($this->_params->map[$key])) {
+            $map = $this->_params->map[$key];
+        }
 
         $reflectionProperty = new \ReflectionProperty($this, $property);
         $reflectionPropertyType = $reflectionProperty?->getType()?->getName() ?? '';
